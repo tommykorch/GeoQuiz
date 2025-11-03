@@ -1,6 +1,7 @@
 package com.example.geoquiz
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -26,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -67,6 +69,11 @@ fun DemoText(message: String, fontSize: Float) {
 
         )
 }
+@Composable
+fun ShowScoreToast(score: Int, quizSize: Int) {
+    val context = LocalContext.current
+    Toast.makeText(context, "Ваш счет: $score из $quizSize", Toast.LENGTH_LONG).show()
+}
 @Preview(showSystemUi = true)
 @Composable
 fun DemoTextPreview() {
@@ -80,56 +87,54 @@ fun DemoTextPreview() {
 @Composable
 fun DemoScreen(modifier: Modifier = Modifier) {
     var questionIndex by remember { mutableStateOf(0) }
+    var lastAnswerCorrect by remember { mutableStateOf<Boolean?>(null) }
+    var answered by remember { mutableStateOf(false) }
     var score by remember { mutableStateOf(0) }
-    var showResult by remember { mutableStateOf(false) }
+    val quizSize = quizQuestions.size
 
-    val question = quizQuestions.getOrNull(questionIndex)
+    val question = quizQuestions[questionIndex]
 
 
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxSize().padding(15.dp)
+        modifier = modifier.fillMaxSize().padding(15.dp)
     ) {
-        var questionIndex by remember { mutableStateOf(0) }
-        var lastAnswerCorrect by remember { mutableStateOf<Boolean?>(null) }
-
-        val question = quizQuestions[questionIndex]
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(5.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+            val question = quizQuestions.getOrNull(questionIndex) ?: return
             Text(text = question.text, fontSize = 20.sp)
             Spacer(modifier = Modifier.height(24.dp))
-            Row(horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()) {
-                Button(onClick = {
-                    lastAnswerCorrect = (question.answer == true)
-                }) { Text("True") }
-                Button(onClick = {
-                    lastAnswerCorrect = (question.answer == false)
-                }) { Text("False") }
-            }
-            Spacer(modifier = Modifier.height(24.dp))
-            Button(
-                onClick = {
-                    if (questionIndex < quizQuestions.lastIndex)
+
+            if (!answered) {
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Button(onClick = {
+                        lastAnswerCorrect = (question.answer == true)
+                        if (lastAnswerCorrect == true) score++
+                        answered = true
+                    }) { Text("True") }
+                    Button(onClick = {
+                        lastAnswerCorrect = (question.answer == false)
+                        if (lastAnswerCorrect == true) score++
+                        answered = true
+                    }) { Text("False") }
+                }
+                if (questionIndex == quizSize - 1) {
+                    ShowScoreToast(score, quizSize)
+                }
+            } else {
+                Button(
+                    onClick = {
                         questionIndex++
-                    else
-                        questionIndex = 0
-                    lastAnswerCorrect = null
-                },
-                modifier = Modifier.align(Alignment.End)
-            ) {
-                Text("Next")
+                        answered = false
+                        lastAnswerCorrect = null
+                    },
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                ) {
+                    Text("Next")
+                }
             }
 
-        }
+    }
+}
 
-}
-}
+
