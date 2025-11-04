@@ -72,7 +72,7 @@ fun DemoText(message: String, fontSize: Float) {
 @Composable
 fun ShowScoreToast(score: Int, quizSize: Int) {
     val context = LocalContext.current
-    Toast.makeText(context, "Ваш счет: $score из $quizSize", Toast.LENGTH_LONG).show()
+    Toast.makeText(context, "Your score: $score out of $quizSize", Toast.LENGTH_LONG).show()
 }
 @Preview(showSystemUi = true)
 @Composable
@@ -102,7 +102,7 @@ fun DemoScreen(modifier: Modifier = Modifier) {
         modifier = modifier.fillMaxSize().padding(15.dp)
     ) {
             val question = quizQuestions.getOrNull(questionIndex) ?: return
-            Text(text = question.text, fontSize = 20.sp)
+            Text(text = "${questionIndex + 1}. ${question.text}", fontSize = 20.sp)
             Spacer(modifier = Modifier.height(24.dp))
 
             if (!answered) {
@@ -118,19 +118,22 @@ fun DemoScreen(modifier: Modifier = Modifier) {
                         answered = true
                     }) { Text("False") }
                 }
-                if (questionIndex == quizSize - 1) {
-                    ShowScoreToast(score, quizSize)
-                }
+
             } else {
-                Button(
-                    onClick = {
-                        questionIndex++
-                        answered = false
-                        lastAnswerCorrect = null
-                    },
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                ) {
-                    Text("Next")
+                if (questionIndex == quizSize-1) {
+                    ShowScoreToast(score, quizSize)
+                    Text(text = "You have answered all the questions!", fontSize = 20.sp,color = Color.Green)
+                } else {
+                    Button(
+                        onClick = {
+                            questionIndex++
+                            answered = false
+                            lastAnswerCorrect = null
+                        },
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    ) {
+                        Text("Next")
+                    }
                 }
             }
 
