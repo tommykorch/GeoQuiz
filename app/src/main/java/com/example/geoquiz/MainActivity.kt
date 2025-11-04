@@ -1,6 +1,7 @@
 package com.example.geoquiz
 
 import android.os.Bundle
+import android.view.Surface
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -14,10 +15,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -33,7 +40,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.geoquiz.ui.theme.GeoQuizTheme
-
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.Text
+import androidx.compose.material3.Surface
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,6 +93,7 @@ fun DemoTextPreview() {
     }
 
 }
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DemoScreen(modifier: Modifier = Modifier) {
     var questionIndex by remember { mutableStateOf(0) }
@@ -91,38 +101,54 @@ fun DemoScreen(modifier: Modifier = Modifier) {
     var answered by remember { mutableStateOf(false) }
     var score by remember { mutableStateOf(0) }
     val quizSize = quizQuestions.size
-
+    val purpleColor = Color(0xFF6200EE)
     val question = quizQuestions[questionIndex]
 
 
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.Top,
         modifier = modifier.fillMaxSize().padding(15.dp)
     ) {
             val question = quizQuestions.getOrNull(questionIndex) ?: return
             Text(text = "${questionIndex + 1}. ${question.text}", fontSize = 20.sp)
             Spacer(modifier = Modifier.height(24.dp))
-
-            if (!answered) {
-                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Button(onClick = {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Button(
+                    onClick = {
                         lastAnswerCorrect = (question.answer == true)
                         if (lastAnswerCorrect == true) score++
                         answered = true
-                    }) { Text("True") }
-                    Button(onClick = {
+                    },
+                    enabled = !answered,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = purpleColor,
+                        contentColor = Color.White
+                    )
+                ) { Text("True") }
+                Button(
+                    onClick = {
                         lastAnswerCorrect = (question.answer == false)
                         if (lastAnswerCorrect == true) score++
                         answered = true
-                    }) { Text("False") }
-                }
+                    },
+                    enabled = !answered,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = purpleColor,
+                        contentColor = Color.White
+                    )
+                ) { Text("False") }
+            }
 
-            } else {
+            Spacer(modifier = Modifier.height(24.dp))
+            if (answered) {
                 if (questionIndex == quizSize-1) {
                     ShowScoreToast(score, quizSize)
-                    Text(text = "You have answered all the questions!", fontSize = 20.sp,color = Color.Green)
+                    Text(text = "You have answered all the questions!", fontSize = 20.sp, color = Color.Green)
                 } else {
                     Button(
                         onClick = {
@@ -130,13 +156,16 @@ fun DemoScreen(modifier: Modifier = Modifier) {
                             answered = false
                             lastAnswerCorrect = null
                         },
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                        modifier = Modifier.align(Alignment.End),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = purpleColor,
+                            contentColor = Color.White
+                        )
                     ) {
                         Text("Next")
                     }
                 }
             }
-
     }
 }
 
